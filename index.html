@@ -492,14 +492,38 @@
       return match ? `${ndc} ${match.subject}` : ndc;
     }
 
+    function setTextWithEllipsis(el, text) {
+      const fullText = String(text || "");
+      const chars = Array.from(fullText);
+      const ellipsis = "…";
+      el.textContent = fullText || " ";
+      el.title = fullText;
+      if (!fullText || el.scrollWidth <= el.clientWidth) return;
+
+      let low = 0;
+      let high = chars.length;
+      while (low < high) {
+        const mid = Math.ceil((low + high) / 2);
+        el.textContent = chars.slice(0, mid).join("") + ellipsis;
+        if (el.scrollWidth <= el.clientWidth) low = mid;
+        else high = mid - 1;
+      }
+
+      el.textContent = chars.slice(0, low).join("") + ellipsis;
+      while (low > 0 && el.scrollWidth > el.clientWidth) {
+        low -= 1;
+        el.textContent = chars.slice(0, low).join("") + ellipsis;
+      }
+    }
+
     function updateCard() {
       updateColorTheme();
-      elements.cardTitle.textContent = `${selectedTitle.prefix || ""}${selectedTitle.suffix || ""}` || " ";
-      elements.cardName.textContent = elements.nameInput.value.trim() || "";
-      elements.cardLibraryType.textContent = selectedOrCustom(elements.libraryType, elements.libraryTypeCustom);
-      elements.cardYears.textContent = selectedYears();
-      elements.cardWorkType.textContent = selectedOrCustom(elements.workType, elements.workTypeCustom);
-      elements.cardNdc.textContent = selectedNdc();
+      setTextWithEllipsis(elements.cardTitle, `${selectedTitle.prefix || ""}${selectedTitle.suffix || ""}` || " ");
+      setTextWithEllipsis(elements.cardName, elements.nameInput.value.trim() || "");
+      setTextWithEllipsis(elements.cardLibraryType, selectedOrCustom(elements.libraryType, elements.libraryTypeCustom));
+      setTextWithEllipsis(elements.cardYears, selectedYears());
+      setTextWithEllipsis(elements.cardWorkType, selectedOrCustom(elements.workType, elements.workTypeCustom));
+      setTextWithEllipsis(elements.cardNdc, selectedNdc());
       updateIconPosition();
     }
 
@@ -648,6 +672,7 @@
     initTitles();
     initNdc();
     resetForm();
+    document.fonts?.ready.then(updateCard);
     requestAnimationFrame(updatePreviewScale);
   </script>
 </body>
