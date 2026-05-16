@@ -60,6 +60,8 @@
     .lp-segmented input:checked + span { background: #fff; color: var(--lp-teal-dark); box-shadow: 0 4px 12px rgba(31,95,93,.10); }
     .lp-picker-button { width: 100%; border: 1px solid rgba(47,129,123,.22); border-radius: 14px; background: #fff; color: var(--lp-ink); padding: 11px 12px; text-align: left; font-weight: 500; box-shadow: none; }
     .lp-picker-button:hover { box-shadow: 0 0 0 4px rgba(47,129,123,.08); }
+    .lp-adjust-button { width: 100%; margin-top: 4px; border: 1px solid rgba(47,129,123,.22); border-radius: 14px; background: var(--lp-teal); color: #fff; padding: 11px 14px; text-align: center; font-weight: 700; box-shadow: 0 8px 18px rgba(47,129,123,.20); }
+    .lp-adjust-button:hover { box-shadow: 0 0 0 4px rgba(47,129,123,.10), 0 10px 22px rgba(47,129,123,.24); }
     .lp-helper { min-height: 1.4em; margin: -2px 0 0; color: #687875; font-size: 12px; line-height: 1.4; }
     .lp-modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: rgba(27,43,42,.28); }
     .lp-dialog { width: min(620px, 100%); max-height: min(720px, calc(100vh - 40px)); display: grid; grid-template-rows: auto auto 1fr; gap: 12px; padding: 18px; border-radius: 18px; background: #fff; box-shadow: 0 24px 70px rgba(31,95,93,.22); }
@@ -133,7 +135,7 @@
         <div class="lp-field">
           <label for="iconInput">アイコン画像</label>
           <input id="iconInput" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,image/png,image/jpeg,image/webp,image/gif">
-          <button class="lp-picker-button" id="iconAdjustButton" type="button" hidden>アイコンを調整</button>
+          <button class="lp-adjust-button" id="iconAdjustButton" type="button" hidden>アイコンを調整</button>
         </div>
 
         <div class="lp-field">
@@ -558,10 +560,30 @@
       updateCard();
     }
 
+    async function makeFilteredTemplateDataUrl(templateImg, filter) {
+      if (!filter || filter === "none") return null;
+      if (!templateImg.complete) {
+        await new Promise(resolve => {
+          templateImg.onload = resolve;
+          templateImg.onerror = resolve;
+        });
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = 1536;
+      canvas.height = 1024;
+      const ctx = canvas.getContext("2d");
+      ctx.filter = filter;
+      ctx.drawImage(templateImg, 0, 0, 1536, 1024);
+      return canvas.toDataURL("image/png");
+    }
+
     async function downloadPng() {
       await document.fonts.ready;
       const exportRoot = document.createElement("div");
       const exportCard = elements.card.cloneNode(true);
+      const sourceTemplate = elements.card.querySelector(".lp-template");
+      const exportTemplate = exportCard.querySelector(".lp-template");
+      const templateFilter = getComputedStyle(sourceTemplate).filter;
       exportRoot.style.position = "fixed";
       exportRoot.style.left = "0";
       exportRoot.style.top = "0";
@@ -576,6 +598,11 @@
       document.body.appendChild(exportRoot);
 
       try {
+        const filteredTemplate = await makeFilteredTemplateDataUrl(sourceTemplate, templateFilter);
+        if (filteredTemplate) {
+          exportTemplate.src = filteredTemplate;
+          exportTemplate.style.filter = "none";
+        }
         await Promise.all(Array.from(exportCard.querySelectorAll("img")).map(img => {
           if (img.complete) return Promise.resolve();
           return new Promise(resolve => {
