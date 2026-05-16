@@ -533,17 +533,47 @@
 
     async function downloadPng() {
       await document.fonts.ready;
-      const canvas = await html2canvas(elements.card, {
-        backgroundColor: null,
-        scale: 1,
-        width: 1536,
-        height: 1024,
-        useCORS: true
-      });
-      const link = document.createElement("a");
-      link.download = "librarian-profile-card.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      const exportRoot = document.createElement("div");
+      const exportCard = elements.card.cloneNode(true);
+      exportRoot.style.position = "fixed";
+      exportRoot.style.left = "0";
+      exportRoot.style.top = "0";
+      exportRoot.style.width = "1536px";
+      exportRoot.style.height = "1024px";
+      exportRoot.style.pointerEvents = "none";
+      exportRoot.style.zIndex = "-1";
+      exportCard.style.transform = "none";
+      exportCard.style.width = "1536px";
+      exportCard.style.height = "1024px";
+      exportRoot.appendChild(exportCard);
+      document.body.appendChild(exportRoot);
+
+      try {
+        await Promise.all(Array.from(exportCard.querySelectorAll("img")).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        }));
+        const canvas = await html2canvas(exportCard, {
+          backgroundColor: null,
+          scale: 1,
+          width: 1536,
+          height: 1024,
+          windowWidth: 1536,
+          windowHeight: 1024,
+          scrollX: 0,
+          scrollY: 0,
+          useCORS: true
+        });
+        const link = document.createElement("a");
+        link.download = "librarian-profile-card.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } finally {
+        exportRoot.remove();
+      }
     }
 
     function updatePreviewScale() {
