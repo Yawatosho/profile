@@ -67,7 +67,8 @@
     .lp-dialog-head h3 { margin: 0; font-size: 17px; letter-spacing: .04em; }
     .lp-icon-button { width: 36px; height: 36px; display: grid; place-items: center; padding: 0; border-radius: 999px; background: #e7efec; color: var(--lp-teal-dark); font-size: 22px; line-height: 1; }
     .lp-icon-adjust-preview { width: 220px; height: 253px; margin: 0 auto 10px; position: relative; overflow: hidden; border-radius: 34% / 28%; background: #f4f7f5; box-shadow: inset 0 0 0 1px rgba(47,129,123,.14); }
-    .lp-icon-adjust-preview img { position: absolute; left: 50%; top: 50%; width: 104%; height: 104%; object-fit: cover; max-width: none; transform: translate(calc(-50% + var(--icon-preview-x, 0px)), calc(-50% + var(--icon-preview-y, 0px))) scale(var(--icon-scale, 1)); transform-origin: center; }
+    .lp-icon-image { position: absolute; left: 50%; top: 50%; width: 104%; height: 104%; max-width: none; background-position: center; background-size: cover; background-repeat: no-repeat; transform-origin: center; }
+    .lp-icon-adjust-preview .lp-icon-image { transform: translate(calc(-50% + var(--icon-preview-x, 0px)), calc(-50% + var(--icon-preview-y, 0px))) scale(var(--icon-scale, 1)); }
     .lp-title-list { min-height: 220px; overflow: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; align-content: start; padding: 2px; }
     .lp-title-choice { border: 1px solid rgba(47,129,123,.18); border-radius: 12px; background: #f8faf8; color: var(--lp-ink); padding: 10px 12px; text-align: left; font-weight: 700; }
     .lp-title-choice[aria-current="true"] { border-color: rgba(47,129,123,.62); background: #e7efec; color: var(--lp-teal-dark); }
@@ -97,7 +98,7 @@
     .lp-card > img.lp-template { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; pointer-events: none; filter: var(--lp-template-filter); }
 
     .lp-icon-area { position: absolute; left: 70px; top: 240px; width: 400px; height: 465px; display: grid; place-items: center; overflow: hidden; border-radius: 34% / 28%; }
-    .lp-icon-area img { position: absolute; left: 50%; top: 50%; width: 104%; height: 104%; object-fit: cover; max-width: none; display: none; transform: translate(calc(-50% + var(--icon-x, 0px)), calc(-50% + var(--icon-y, 0px))) scale(var(--icon-scale, 1)); transform-origin: center; }
+    .lp-icon-area .lp-icon-image { display: none; transform: translate(calc(-50% + var(--icon-x, 0px)), calc(-50% + var(--icon-y, 0px))) scale(var(--icon-scale, 1)); }
 
     .lp-title-zone { position: absolute; left: 628px; top: 76px; width: 840px; height: 112px; display: flex; justify-content: flex-start; align-items: center; }
     .lp-title-zone::before { content: ""; position: absolute; left: 98px; top: 8px; width: 396px; height: 96px; border-radius: 999px; background: #fdfcfa; }
@@ -211,7 +212,7 @@
               <article class="lp-card" id="profileCard">
                 <img class="lp-template" alt="カードテンプレート" src="profile_card_template.png">
                 <div class="lp-icon-area">
-                  <img id="iconPreview" alt="">
+                  <div class="lp-icon-image" id="iconPreview" role="img" aria-label="アップロードしたアイコン"></div>
                 </div>
                 <div class="lp-title-zone">
                   <div class="lp-title" id="cardTitle">静かなる案内人</div>
@@ -255,7 +256,7 @@
         <button class="lp-icon-button" id="iconModalClose" type="button" aria-label="閉じる">×</button>
       </div>
       <div class="lp-icon-adjust-preview" aria-label="アイコンプレビュー">
-        <img id="iconAdjustPreview" alt="">
+        <div class="lp-icon-image" id="iconAdjustPreview" role="img"></div>
       </div>
       <div class="lp-field">
         <span class="lp-mini-label">位置と大きさ</span>
@@ -300,6 +301,7 @@
     let titleOptions = { prefixes: ["静かなる"], suffixes: ["案内人"] };
     let selectedTitle = { prefix: "静かなる", suffix: "案内人" };
     let activeTitlePart = "prefix";
+    let iconDataUrl = "";
 
     function normalizeTitles(data) {
       if (Array.isArray(data)) {
@@ -463,7 +465,7 @@
     }
 
     function openIconAdjuster() {
-      if (!elements.iconPreview.src) return;
+      if (!iconDataUrl) return;
       elements.iconModal.hidden = false;
     }
 
@@ -531,8 +533,9 @@
       elements.iconInput.value = "";
       elements.iconAdjustButton.hidden = true;
       closeIconAdjuster();
-      elements.iconPreview.removeAttribute("src");
-      elements.iconAdjustPreview.removeAttribute("src");
+      iconDataUrl = "";
+      elements.iconPreview.style.backgroundImage = "";
+      elements.iconAdjustPreview.style.backgroundImage = "";
       elements.iconPreview.style.display = "none";
       elements.iconX.value = 0;
       elements.iconY.value = 0;
@@ -623,8 +626,9 @@
       }
       const reader = new FileReader();
       reader.onload = () => {
-        elements.iconPreview.src = reader.result;
-        elements.iconAdjustPreview.src = reader.result;
+        iconDataUrl = reader.result;
+        elements.iconPreview.style.backgroundImage = `url(${iconDataUrl})`;
+        elements.iconAdjustPreview.style.backgroundImage = `url(${iconDataUrl})`;
         elements.iconPreview.style.display = "block";
         elements.iconAdjustButton.hidden = false;
         openIconAdjuster();
