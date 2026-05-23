@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>日本十進分類カルタ</title>
-  <meta name="description" content="NDCを素早く見抜いてカードを取る、日本十進分類カルタ。">
-  <meta property="og:title" content="日本十進分類カルタ">
-  <meta property="og:description" content="分類コードを読み解き、最速で札を取れ。">
+  <title>日本十進分類カルタ ENDLESS</title>
+  <meta name="description" content="NDCを素早く見抜いてカードを取り続ける、日本十進分類カルタ エンドレスモード。">
+  <meta property="og:title" content="日本十進分類カルタ ENDLESS">
+  <meta property="og:description" content="分類コードを読み解き、ライフが尽きるまで札を取り続けろ。">
   <meta property="og:image" content="日本十進分類カルタロゴOGP.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <script src="game.js" defer></script>
+  <script src="endless_game.js" defer></script>
 </head>
 <body>
   <main id="main" class="arena">
@@ -26,7 +26,7 @@
       </header>
 
       <div class="topbar">
-        <div class="status-chip">10 ROUNDS / 15 SEC</div>
+        <div class="status-chip">ENDLESS / 10 ROUNDS PER WAVE / LIFE 3</div>
         <div class="toggle-stack">
           <div class="sound-toggle-wrapper">
             <span class="toggle-label">SOUND</span>
@@ -39,9 +39,9 @@
 
       <div id="karuta">
         <div class="mode-actions" aria-label="モード選択">
-          <a id="hiscoreButton" class="active" href="index.html">HI SCORE MODE</a>
+          <a id="hiscoreButton" href="index.html">HI SCORE MODE</a>
           <a id="cpuButton" href="karuta_cpu.html">VS CPU MODE</a>
-          <a id="endlessButton" href="karuta_endless.html">ENDLESS MODE</a>
+          <a id="endlessButton" class="active" href="karuta_endless.html">ENDLESS MODE</a>
         </div>
         <p class="action-row">
           <button id="rankingButton" type="button">RANKING</button>
@@ -60,6 +60,8 @@
             <div id="digit3" class="digit"><div class="num">&nbsp;</div></div>
           </div>
           <div class="hud">
+            <div id="waveDisplay">WAVE: 1</div>
+            <div id="lifeDisplay">LIFE: 3</div>
             <div id="scoreDisplay">SCORE: 0pt</div>
             <div id="comboDisplay"></div>
             <div id="timeDisplay">TIME: 15.0 sec</div>
@@ -117,7 +119,7 @@
           </section>
           <section>
             <h3>3. 全10ラウンド</h3>
-            <p>1ラウンド15秒。不正解は-500pt、パーフェクトなら最後にスコア2倍。</p>
+            <p>10ラウンドで1wave。ライフが0になるまでwaveを突破し続けます。</p>
           </section>
         </div>
       </div>
